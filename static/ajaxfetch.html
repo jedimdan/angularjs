@@ -8,10 +8,11 @@
       function TodoController($scope,$resource){
         
         $scope.apikey = "123";
+        $scope.remote_url = "http://code-comparison.appspot.com";
         $scope.model = "user";
       	$scope.todos = [];
         $scope.Model = $resource('/:apikey/:model_type');
-        $scope.RemoteMetadata = $resource('http://code-comparison.appspot.com/:apikey/metadata',
+        $scope.RemoteMetadata = $resource($scope.remote_url+'/:apikey/metadata',
                                 {callback: 'JSON_CALLBACK'}, 
                                    {get: {method: 'JSONP', isArray: false}}
                             );
