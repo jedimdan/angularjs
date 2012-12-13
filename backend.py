@@ -170,7 +170,7 @@ class ActionHandler(webapp.RequestHandler):
                   'id': model_id
                   }
       	return self.respond(result)
-                    
+      
 application = webapp.WSGIApplication([
     webapp.Route('/<apikey>/metadata', handler=ActionHandler, handler_method='metadata'), 
     webapp.Route('/<apikey>/clear', handler=ActionHandler, handler_method='clear_apikey'),
@@ -181,8 +181,4 @@ application = webapp.WSGIApplication([
     ],
     debug=True)
 
-def main():
-    run_wsgi_app(application)
 
-if __name__ == "__main__":
-    main()

@@ -58,6 +58,12 @@
       <input type="submit" value="add">
     </form>
     <hr>
+      <ul>
+      <li ng-repeat="m in items">
+        {{m}}
+      </li>
+    </ul>
+    <hr>
       {{model}}(s): <pre>{{items}}</pre><br>
     Remote: <pre>{{remote}}</pre><br>
     Local: <pre>{{local}}</pre><br>
