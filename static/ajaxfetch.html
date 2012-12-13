@@ -8,6 +8,7 @@
       function TodoController($scope,$resource){
         
         $scope.apikey = "123";
+        //Replace this url with your final URL from the SingPath API path. 
         $scope.remote_url = "http://code-comparison.appspot.com";
         $scope.model = "user";
       	$scope.todos = [];
@@ -59,8 +60,9 @@
       <input type="submit" value="add">
     </form>
     <hr>
+      Here are the models liste for the given API key.
       <ul>
-      <li ng-repeat="m in items">
+      <li ng-repeat="m in items.entities">
         {{m}}
       </li>
     </ul>
