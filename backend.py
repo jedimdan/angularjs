@@ -24,17 +24,72 @@ class Backend(db.Model):
   created = db.DateTimeProperty(auto_now_add=True) #The time that the model was created    
   modified = db.DateTimeProperty(auto_now=True)
   
-  def add(self, apikey, model, data):
+  @staticmethod
+  def add(apikey, model, data):
     #update ModelCount when adding
-    pass
+    jsonString = json.dumps(data)
+    entity = Backend(apikey=apikey,
+                    model=model,
+                    jsonString=jsonString)
+    
+    entity.put()
+    modelCount = ModelCount.all().filter('apikey',apikey).filter('model', model).get()
+    if modelCount:
+      modelCount.count += 1
+      modelCount.put()
+    else:
+      modelCount = ModelCount(apikey=apikey, model=model, count=1)
+      modelCount.put()
+    
+    result = {'model':model,
+              'apikey': apikey,
+              'id': entity.key().id(), 
+              'data': json.loads(jsonString)}
+        
+    return result
   
-  def clear(self,apikey, model):
+  @staticmethod
+  def get_entities(apikey, model):
+    #update ModelCount when adding
+    objects = Backend.all().filter('apikey',apikey).filter('model', model).fetch(50)
+    
+    entities = []
+    for object in objects:
+      entity = {'model':model,
+              'apikey': apikey,
+              'id': object.key().id(), 
+              'data': json.loads(object.jsonString)}
+      entities.append(entity)
+    
+    count = 0
+    modelCount = ModelCount.all().filter('apikey',apikey).filter('model', model).get()
+    if modelCount:
+      count = modelCount.count
+    result = {'method':'get_entities',
+              'apikey': apikey,
+              'model': model,
+              'count': count,
+              'entities': entities}      
+    return result
+  
+  @staticmethod
+  def clear(apikey, model):
     #update model count when clearing model on api
-    pass
+    count = 0
+    for object in Backend.all().filter('apikey',apikey).filter('model', model):
+      count += 1
+      object.delete()
+      
+    modelCount = ModelCount.all().filter('apikey',apikey).filter('model', model).get()
+    if modelCount:
+      modelCount.delete()
+    result = {'items_deleted': count}
+    return result
   
-  def delete(self,apikey, model, model_id):
-    #update model count when deleting
-    pass
+  #You can't name it delete since db.Model already has a delete method
+  #def remove(self,apikey, model, model_id):
+  #  #update model count when deleting
+  #  pass
 
   #data is a dictionary that must be merged with current json data and stored. 
   def edit(self,apikey, model, model_id, data):
@@ -62,8 +117,12 @@ class ActionHandler(webapp.RequestHandler):
 
     def metadata(self,apikey):
       	#Fetch all ModelCount records for apikey to produce metadata on currently supported models. 
-      	result = {'method':'metadata',
-                  'apikey': apikey
+      	models = []
+        for mc in ModelCount.all().filter('apikey',apikey):
+          models.append({'model':mc.model, 'count': mc.count})
+        result = {'method':'metadata',
+                  'apikey': apikey, 
+                  'models': models
                   }
       	return self.respond(result)
       
@@ -75,15 +134,21 @@ class ActionHandler(webapp.RequestHandler):
     def clear_model(self,apikey, model):
         """Clears the datastore for a model and apikey.
         """
-        return self.respond({'method':'clear_model'})
+      	result = Backend.clear(apikey, model)
+        return self.respond(result)
 
     def add_or_list_model(self,apikey,model):
       	#Check for GET paramenter == model to see if this is an add or list. 
       	#Call Backend.add(apikey, model, data) or
         #Fetch all models for apikey and return a list. 
-      	result = {'method':'add_or_list_model',
-                  'apikey': apikey,
-                  'model': model}
+        
+      	
+        data = self.request.get(model)
+        if data: 
+          result = Backend.add(apikey, model, data)
+        else:
+          result = Backend.get_entities(apikey, model)
+          
       	return self.respond(result)
 
     def delete_model(self,apikey,model, model_id):
