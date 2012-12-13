@@ -5,7 +5,6 @@
     <script language="javascript" type="text/javascript">
         function TodoCtrl($scope) {
           $scope.todos = [];
- 
           $scope.addTodo = function() {
               $scope.todos.push({text:$scope.todoText});
               $scope.todoText = '';
@@ -13,20 +12,17 @@
          }
     </script>
   </head>
-  <body>
-    <h2>Please leave a message</h2>
-    <div ng-controller="TodoCtrl">
-      There are {{todos.length}} messages
+  <body ng-controller="TodoCtrl">
+    <h2>How could we make this site better?</h2>
+      There are {{todos.length}} suggestions
       <ul>
         <li ng-repeat="todo in todos">
           {{todo.text}}
         </li>
       </ul>
       <form ng-submit="addTodo()">
-        <input type="text" ng-model="todoText"  size="30"
-               placeholder="add new message here">
+        <input type="text" ng-model="todoText"  size="30" placeholder="add new message here">
         <input type="submit" value="add">
       </form>
-    </div>
   </body>
 </html>

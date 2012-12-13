@@ -1,0 +1,53 @@
+<!doctype html>
+<html ng-app="ProblemBuilder">
+  <header>
+    <script src="http://bit.ly/angular429"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.2/angular-resource.min.js"></script>
+    <script language="javascript" type="text/javascript">
+      angular.module('ProblemBuilder', ['ngResource']);
+      function TodoController($scope,$resource){
+        
+      	$scope.todos = [];
+        $scope.Metadata = $resource('data/metadata');
+        $scope.metadata = $scope.Metadata.get();
+        $scope.Model = $resource('data/:model_type');
+        
+        $scope.addTodo = function(){
+          $scope.todos.push({text:$scope.todoText});
+          $scope.todoText = "";
+          $scope.users = $scope.Model.get({model_type:"User"});
+          $scope.project =  $scope.Project.query({}); 
+          $scope.Project.get({},
+                function(response) { 
+                    $scope.temp = response;  
+                });
+        
+        };
+        //Add isArray: true
+        $scope.Project = $resource('http://www.singpath.com/jsonapi/mobile_paths',
+                                {callback: 'JSON_CALLBACK'}, 
+                                   {get: {method: 'JSONP', isArray: true}}
+                            );
+        
+      }
+    </script>
+  </header>
+	<body ng-controller="TodoController">
+    <h2>How can we get better?</h2>
+    There are {{todos.length}} suggestions. 
+    <ul>
+      <li ng-repeat="todo in todos">
+        {{todo.text}}
+      </li>
+    </ul>
+    <form ng-submit="addTodo()">
+      <input type="text" ng-model="todoText" placeholder="add here">
+      <input type="submit" value="add">
+    </form>
+    <hr>
+    Mobile Paths: <pre>{{metadata}}</pre><br>
+    Users: <pre>{{users}}</pre><br>
+    Project: <pre>{{project}}</pre><br>
+    Temp: <pre>{{temp}}</pre>
+  </body>
+</html>
