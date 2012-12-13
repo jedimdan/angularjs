@@ -1,0 +1,62 @@
+<!doctype html>
+<html ng-app="ProblemBuilder">
+  <header>
+    <script src="http://bit.ly/angular429"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.2/angular-resource.min.js"></script>
+    <script language="javascript" type="text/javascript">
+      angular.module('ProblemBuilder', ['ngResource']);
+      function TodoController($scope,$resource){
+        
+        $scope.apikey = "123";
+      	$scope.todos = [];
+        $scope.Model = $resource('/'+$scope.apikey+'/:model_type');
+        $scope.RemoteMetadata = $resource('http://code-comparison.appspot.com/'+$scope.apikey+'/metadata',
+                                {callback: 'JSON_CALLBACK'}, 
+                                   {get: {method: 'JSONP', isArray: false}}
+                            );
+        
+        $scope.LocalMetadata = $resource('/'+$scope.apikey+'/metadata',
+                                {callback: 'JSON_CALLBACK'}, 
+                                   {get: {method: 'JSONP', isArray: false}}
+                            );
+        //Will run when the page loads. 
+        $scope.local = $scope.LocalMetadata.get({});
+        
+        $scope.addTodo = function(){
+          $scope.todos.push({text:$scope.todoText});
+          $scope.todoText = "";
+          $scope.users = $scope.Model.get({model_type:"user"});
+          $scope.remote =  $scope.RemoteMetadata.get({}); 
+          $scope.local = $scope.LocalMetadata.get({});
+          
+          $scope.RemoteMetadata.get({},
+                function(response) { 
+                    $scope.temp = response;  
+                });
+        
+        };
+
+        
+                           
+      }
+    </script>
+  </header>
+	<body ng-controller="TodoController">
+    <h2>How can we get better?</h2>
+    There are {{todos.length}} suggestions. 
+    <ul>
+      <li ng-repeat="todo in todos">
+        {{todo.text}}
+      </li>
+    </ul>
+    <form ng-submit="addTodo()">
+      <input type="text" ng-model="todoText" placeholder="add here">
+      <input type="submit" value="add">
+    </form>
+    <hr>
+    Users: <pre>{{users}}</pre><br>
+    Remote: <pre>{{remote}}</pre><br>
+    Local: <pre>{{local}}</pre><br>
+    Temp: <pre>{{temp}}</pre>
+  </body>
+</html>

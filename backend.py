@@ -13,8 +13,7 @@ from google.appengine.api import memcache
 from google.appengine.ext import db
 from google.appengine.ext.webapp.util import run_wsgi_app
 
-from django.utils import simplejson as json
-
+import json
 
 class Backend(db.Model):
   apikey = db.StringProperty(required=True,default='Default-APIKey')
@@ -112,7 +111,12 @@ class ActionHandler(webapp.RequestHandler):
     def respond(self,result):
         """Returns a JSON response to the client.
         """
+        callback = self.request.get('callback')
         self.response.headers['Content-Type'] = 'application/json'
+        if callback:
+        	content = str(callback) + '(' + json.dumps(result) + ')'
+        	return self.response.out.write(content)
+    		
         return self.response.out.write(json.dumps(result)) 
 
     def metadata(self,apikey):
