@@ -8,28 +8,29 @@
       function TodoController($scope,$resource){
         
         $scope.apikey = "123";
+        $scope.model = "user";
       	$scope.todos = [];
-        $scope.Model = $resource('/'+$scope.apikey+'/:model_type');
-        $scope.RemoteMetadata = $resource('http://code-comparison.appspot.com/'+$scope.apikey+'/metadata',
+        $scope.Model = $resource('/:apikey/:model_type');
+        $scope.RemoteMetadata = $resource('http://code-comparison.appspot.com/:apikey/metadata',
                                 {callback: 'JSON_CALLBACK'}, 
                                    {get: {method: 'JSONP', isArray: false}}
                             );
         
-        $scope.LocalMetadata = $resource('/'+$scope.apikey+'/metadata',
+        $scope.LocalMetadata = $resource('/:apikey/metadata',
                                 {callback: 'JSON_CALLBACK'}, 
                                    {get: {method: 'JSONP', isArray: false}}
                             );
         //Will run when the page loads. 
-        $scope.local = $scope.LocalMetadata.get({});
+        $scope.local = $scope.LocalMetadata.get({'apikey':$scope.apikey});
         
         $scope.addTodo = function(){
           $scope.todos.push({text:$scope.todoText});
           $scope.todoText = "";
-          $scope.users = $scope.Model.get({model_type:"user"});
-          $scope.remote =  $scope.RemoteMetadata.get({}); 
-          $scope.local = $scope.LocalMetadata.get({});
+          $scope.items = $scope.Model.get({model_type:$scope.model,'apikey':$scope.apikey});
+          $scope.remote =  $scope.RemoteMetadata.get({'apikey':$scope.apikey}); 
+          $scope.local = $scope.LocalMetadata.get({'apikey':$scope.apikey});
           
-          $scope.RemoteMetadata.get({},
+          $scope.RemoteMetadata.get({'apikey':$scope.apikey},
                 function(response) { 
                     $scope.temp = response;  
                 });
@@ -42,6 +43,7 @@
     </script>
   </header>
 	<body ng-controller="TodoController">
+    <h2>This page will become the editor that can edit any items for a given apikey. 
     <h2>How can we get better?</h2>
     There are {{todos.length}} suggestions. 
     <ul>
@@ -49,14 +51,18 @@
         {{todo.text}}
       </li>
     </ul>
+      API Key: <input type="text" ng-model="apikey"><br>
+      Model: <input type="text" ng-model="model"><br>
     <form ng-submit="addTodo()">
       <input type="text" ng-model="todoText" placeholder="add here">
       <input type="submit" value="add">
     </form>
     <hr>
-    Users: <pre>{{users}}</pre><br>
+      {{model}}(s): <pre>{{items}}</pre><br>
     Remote: <pre>{{remote}}</pre><br>
     Local: <pre>{{local}}</pre><br>
     Temp: <pre>{{temp}}</pre>
+    apikey: {{apikey}}<br>
+    model: {{model}}  
   </body>
 </html>
