@@ -3,7 +3,9 @@
 Created on Dec 6, 2012
 @author: Chris Boesch
 """
-
+"""
+Note to self: json.loads = json string to objects. json.dumps is object to json string.
+"""
 import datetime
 import logging
 
@@ -26,7 +28,7 @@ class Backend(db.Model):
   @staticmethod
   def add(apikey, model, data):
     #update ModelCount when adding
-    jsonString = json.dumps(data)
+    jsonString = data
     entity = Backend(apikey=apikey,
                     model=model,
                     jsonString=jsonString)
@@ -43,7 +45,7 @@ class Backend(db.Model):
     result = {'model':model,
               'apikey': apikey,
               'id': entity.key().id(), 
-              'data': json.loads(jsonString)}
+              'data': json.loads(jsonString)} #this would also check if the json submitted was valid
         
     return result
   
