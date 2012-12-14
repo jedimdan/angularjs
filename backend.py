@@ -188,6 +188,7 @@ class ActionHandler(webapp.RequestHandler):
       	
         data = self.request.get(model)
         if data: 
+          logging.info("Adding new data: "+data)
           result = Backend.add(apikey, model, data)
         else:
           result = Backend.get_entities(apikey, model)
@@ -200,11 +201,16 @@ class ActionHandler(webapp.RequestHandler):
       	return self.respond(result)
       
     def get_or_edit_model(self,apikey,model, model_id):
-      	result = {'method':'get_or_edit_model',
-                  'apikey': apikey,
-                  'model': model,
-                  'id': model_id
-                  }
+      	#Check for GET parameter == model to see if this is a get or an edit
+      	#technically the apikey and model are not required. 
+      	#To create an error message if the id is not from this apikey?
+      	
+      	data = self.request.get(model)
+      	if data:
+      		result = Backend.edit_entity(apikey,model,model_id,data)
+      	else:
+      		result = Backend.get_entity(apikey,model,model_id)
+      	
       	return self.respond(result)
       
 application = webapp.WSGIApplication([
