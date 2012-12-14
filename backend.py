@@ -105,8 +105,19 @@ class Backend(db.Model):
   #  pass
 
   #data is a dictionary that must be merged with current json data and stored. 
-  def edit(self,apikey, model, model_id, data):
-    pass
+  @staticmethod
+  def edit_entity(apikey, model, model_id, data):
+    jsonString = data
+    entity = Backend.get_by_id(int(model_id))
+    entity.jsonString = jsonString
+    entity.put()
+    
+    result = {'model':model,
+              'apikey': apikey,
+              'id': entity.key().id(), 
+              'data': json.loads(entity.jsonString)} #this would also check if the json submitted was valid
+        
+    return result
 
 #Quick retrieval for supported models metadata and count stats
 class ModelCount(db.Model):
