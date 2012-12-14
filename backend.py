@@ -100,9 +100,23 @@ class Backend(db.Model):
     return result
   
   #You can't name it delete since db.Model already has a delete method
-  #def remove(self,apikey, model, model_id):
-  #  #update model count when deleting
-  #  pass
+  @staticmethod
+  def remove(apikey, model, model_id):
+  	#update model count when deleting
+  	entity = Backend.get_by_id(int(model_id))
+  	
+  	if entity and entity.apikey == apikey and entity.model == model:
+  		entity.delete()
+  	
+  		result = {'method':'delete_model_success',
+                  'apikey': apikey,
+                  'model': model,
+                  'id': model_id
+                  }
+  	else:
+  		result = {'method':'delete_model_notfound'}
+  	
+  	return result
 
   #data is a dictionary that must be merged with current json data and stored. 
   @staticmethod
@@ -181,11 +195,8 @@ class ActionHandler(webapp.RequestHandler):
       	return self.respond(result)
 
     def delete_model(self,apikey,model, model_id):
-      	result = {'method':'delete_model',
-                  'apikey': apikey,
-                  'model': model,
-                  'id': model_id
-                  }
+      	result = Backend.remove(apikey,model, model_id)
+      	
       	return self.respond(result)
       
     def get_or_edit_model(self,apikey,model, model_id):
