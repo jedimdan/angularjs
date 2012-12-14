@@ -70,6 +70,18 @@ class Backend(db.Model):
               'count': count,
               'entities': entities}      
     return result
+    
+  @staticmethod
+  def get_entity(apikey,model,model_id):
+    theobject = Backend.get_by_id(int(model_id))
+    
+    result = {'method':'get_model',
+                  'apikey': apikey,
+                  'model': model,
+                  'id': model_id,
+                  'data': json.loads(theobject.jsonString)
+                  }
+    return result
   
   @staticmethod
   def clear(apikey, model):
